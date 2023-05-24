@@ -1,0 +1,115 @@
+---
+title: "ENVS 193DS Homework 5"
+format: 
+  html:
+    toc: true
+    toc-location: left
+    code-fold: true
+    theme: yeti
+execute: 
+  message: false
+  warning: false
+---
+
+```{r libraries}
+library(tidyverse)
+library(here)
+library(janitor)
+library(ggeffects)
+library(performance)
+library(naniar) # or equivalent
+library(flextable) # or equivalent
+library(car)
+library(broom)
+# would be nice to have
+#install.packages("corrplot") 
+library(corrplot)
+#install.packages("AICcmodavg")
+library(AICcmodavg)
+#install.packages("GGally")
+library(GGally)
+```
+
+```{r reading-data}
+plant <- read_csv(here("data", "hf109-01-sarracenia.csv")) %>% 
+  # make the column names cleaner
+  clean_names() %>% 
+  # selecting the columns of interest
+  select(totmass, species, feedlevel, sla, chlorophyll, amass, num_lvs, num_phylls)
+```
+
+```{r missing-data-visualization}
+gg_miss_var(plant)
+```
+
+Subsetting the data by dropping NAs:
+
+```{r subset-drop-NA}
+plant_subset <- plant %>% 
+  drop_na(sla, chlorophyll, amass, num_lvs, num_phylls)
+```
+
+Create a correlation plot:
+
+(example writing) To determine the realtionships between numerical variables in our dataset, we calculated Pearson's r and visually represented correlation using a correlation plot.
+
+```{r correlation-plot}
+# calculate pearson's r for numerical values only
+plant_cor <- plant_subset %>% 
+  select(feedlevel:num_phylls) %>% 
+  cor(method = "pearson")
+
+# creating a correlation plot
+corrplot(plant_cor,
+         # change the shape of what's in the cells
+         method = "ellipse",
+         addCoef.col = "black"
+         )
+```
+
+Create a plot of each variable compared against the others
+
+```{r pairs-plot}
+plant_subset %>% 
+  select(species:num_phylls) %>% 
+  ggpairs()
+```
+
+Starting regression here:
+
+(example) To determine how species and physiological characteristics predict biomass, we fit multiple linear models.
+
+```{r null-and-full-models}
+# making a null model, which is represented by a one and we only want it from the plant_subset dataset
+null <- lm(totmass ~ 1, data = plant_subset)
+# now we include all of the variables
+full <- lm(totmass ~ species + feedlevel + sla + chlorophyll + amass + num_lvs + num_phylls, data = plant_subset)
+```
+
+We visually assess normality and homoscedasticity of residuals using diagnostic plots for the full model:
+
+```{r full-diagnostic}
+par(mfrow = c(2,2))
+plot(full)
+```
+
+For homoscedasticity, this is easier to see in residuals vs fitted, and shows that the red lines are flat (good sign) and the dots are spread out in comparison. Clumped in beginning and then spread out, so a little cone shaped, therefore it is borderline homoscedasticity.
+
+We also tested for normality using the Shapiro-Wilk test (null hypothesis: variable of interest (i.e. the residuals) are normally distributed)
+
+We tested for homoscedasticity using the Breusch-Pagan test (null hypothesis: variable of interest has constant variance).
+
+```{r}
+check_normality(full)
+check_heteroscedasticity(full)
+```
+
+Transform the response variable (take the log 10 or whatever mathematical transformation) to transform your residuals to be normal because most data from the field, is not normal (as we have seen).
+
+```{r}
+full_log <- lm(log(totmass) ~ species + feedlevel + sla + chlorophyll + amass + num_lvs + num_phylls, data = plant_subset)
+
+plot(full_log)
+check_normality(full_log)
+check_heteroscedasticity(full_log)
+```
