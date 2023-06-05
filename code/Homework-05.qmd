@@ -8,6 +8,8 @@ editor: visual
 
 ## Introduction
 
+Sarracenia are pitcher plants that are carnivorous and bright in appearance. Pitchers are specialized leaves that sarracenia have, which have been evolved to capture and digest prey (Fish). Specially, they have been found to obtain, use, store, and re-use nitrogen as a major component of their plant fitness (Butler). People care about sarracenia because they help to control insect populations and cycle nutrients in their ecosystems (Newell). It is important to understand how the characteristics of sarracenia predict their biomass because it provide helpful insight to their ecological role and how they affect the environment. In this study, predicting biomass based off of sarracenia characteristics will be addressed. Specifically, sarracenia will be given differing amounts of prey, and the effects on photosynthetic rate, chlorophyll fluorescence, growth, architecture, foliar nutrient, and chlorophyll content will be measured. The hypothesis that was tested was that increased prey availability to sarracenia would increase overall plant biomass.
+
 ## Methods
 
 ```{r libraries}
@@ -125,9 +127,7 @@ car::vif(full_log)
 
 We evaluated multicollinearity by calculating generalized variance inflation factor and determined that....
 
-try some models
-
-addressing the question: what set of predictor variables best explores the response?
+Addressing the question: what set of predictor variables best explores the response?
 
 ```{r model2_log}
 model2_log <- lm(log(totmass) ~ species, data = plant_subset)
@@ -142,6 +142,8 @@ check_normality(model2_log)
 check_heteroscedasticity(model2_log)
 ```
 
+The species model2_log passes the check for normality and also passes the check for heteroscedasticity.
+
 Compare models using Akaike's Information criterion (AIC) values
 
 ```{r compare-mdoels-with-AIC}
@@ -155,15 +157,13 @@ MuMIn::AICc(full_log, model2_log, null_log)
 MuMIn::model.sel(full_log, model2_log, null_log)
 ```
 
-The model that seems to be the best is full_log (it is looking for what explains the most variance) because it's value is the lowest. We are looking for the simplest explanation, so what in the full_log explains the variance.
-
-We compared models using AIC and chose the model with the lowest value, which was... (An's words)
+The model that seems to be the best is full_log (it is looking for what explains the most variance) because it's value is the lowest. The AIC value for the full_log was 133.9 and for model2_log is was 157.6 and 133.9 \< 157.6 so full_log best explains the variance.
 
 ```{r model3_log}
 model3_log <- lm(log(totmass) ~ sla, data = plant_subset)
 ```
 
-Check assumptions for model 3
+Check assumptions for model 3:
 
 ```{r check-assumptions-model-3}
 plot(model3_log)
@@ -171,6 +171,8 @@ plot(model3_log)
 check_normality(model3_log)
 check_heteroscedasticity(model3_log)
 ```
+
+The sla model3_log does not pass the check for normality and also does not pass the check for heteroscedasticity.
 
 Compare models using Akaike's Information criterion (AIC) values
 
@@ -185,13 +187,13 @@ MuMIn::AICc(full_log, model3_log, null_log)
 MuMIn::model.sel(full_log, model3_log, null_log)
 ```
 
-The model that seems to be the best is full_log (it is looking for what explains the most variance) because it's value is the lowest. We are looking for the simplest explanation, so what in the full_log explains the variance.
-
-We compared models using AIC and chose the model with the lowest value, which was... (An's words)
+We compared models using AIC and chose the model with the lowest value, which was full_log because it has a AIC value of 133.9 and sla's AIC value is 274.7. Because 133.9 is less than 274.7, it full_log is the model that explains the variance the most.
 
 ```{r model4_log}
 model4_log <- lm(log(totmass) ~ feedlevel, data = plant_subset)
 ```
+
+Check assumptions for model 4:
 
 ```{r check-assumptions-model-4}
 plot(model4_log)
@@ -199,6 +201,10 @@ plot(model4_log)
 check_normality(model4_log)
 check_heteroscedasticity(model4_log)
 ```
+
+The feedlevel model4_log does not pass the check for normality, although it passes the check for heteroscedasticity.
+
+Compare models using Akaike's Information criterion (AIC) values
 
 ```{r compare-mdoels-with-AIC}
 #AICc is for smaller smaple sizes
@@ -210,3 +216,13 @@ AICc(null_log)
 MuMIn::AICc(full_log, model4_log, null_log)
 MuMIn::model.sel(full_log, model4_log, null_log)
 ```
+
+The model that seems to be the best is full_log because it's value is the lowest. The AIC value for the full_log was 133.9 and for model4_log is was 295.0 and 133.9 \< 295.0. We are looking for the simplest explanation, so full_log best explains the variance.
+
+## Bibliography
+
+BUTLER, J.L. and ELLISON, A.M. (2007), Nitrogen cycling dynamics in the carnivorous northern pitcher plant, *Sarracenia purpurea*. Functional Ecology, 21: 835-843. https://doi.org/10.1111/j.1365-2435.2007.01307.x
+
+Fish, Durland, and Donald W. Hall. \"Succession and Stratification of Aquatic Insects Inhabiting the Leaves of the Insectivorous Pitcher Plant, Sarracenia Purpurea.\" *The American Midland Naturalist* 99, no. 1 (1978): 172--83. https://doi.org/10.2307/2424941
+
+Newell, S.J. and Nastase, A.J. (1998), Efficiency of insect capture by *Sarracenia purpurea*(Sarraceniaceae), the northern pitcher plant. Am. J. Bot., 85: 88-91. https://doi.org/10.2307/2446558
