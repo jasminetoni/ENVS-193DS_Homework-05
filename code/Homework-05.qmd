@@ -6,15 +6,13 @@ editor: visual
 
 # Introduction
 
-Sarracenia are pitcher plants that are carnivorous and bright in appearance. Pitchers are specialized leaves that sarracenia have, which have been evolved to capture and digest prey (Fish). Specially, they have been found to obtain, use, store, and re-use nitrogen as a major component of their plant fitness (Butler). People care about sarracenia because they help to control insect populations and cycle nutrients in their ecosystems (Newell). It is important to understand how the characteristics of sarracenia predict their biomass because it provide helpful insight to their ecological role and how they affect the environment. In this study, predicting biomass based off of sarracenia characteristics will be addressed. Specifically, sarracenia will be given differing amounts of prey, and the effects on photosynthetic rate, chlorophyll fluorescence, growth, architecture, foliar nutrient, and chlorophyll content will be measured. The hypothesis that was tested was that increased prey availability to sarracenia would increase overall plant biomass.
+Sarracenia are pitcher plants that are carnivorous and bright in appearance. Pitchers are specialized leaves that Sarracenia have, which have been evolved to capture and digest prey (Fish). Specially, they have been found to obtain, use, store, and re-use nitrogen as a major component of their plant fitness (Butler). People care about Sarracenia because they help to control insect populations and cycle nutrients in their ecosystems (Newell). It is important to understand how the characteristics of Sarracenia predict their biomass because it provide helpful insight to their ecological role and how they affect the environment. In this study, predicting biomass based off of Sarracenia characteristics will be addressed. Specifically, Sarracenia will be given differing amounts of prey, and the effects on photosynthetic rate, chlorophyll fluorescence, growth, architecture, foliar nutrient, and chlorophyll content will be measured. The hypothesis that was tested was that increased prey availability to Sarracenia would increase overall plant biomass.
 
 # Methods
 
 ## Sampling Methods
 
-Each Sarracenia species had two plants that were assigned one of six feeding levels in a regression design ranging from 0 to 0.25g of finely ground wasps per feeding for small sized species, 0 to 0.5g for intermediate sized species, and 0 - 1.0g for large sized species. The population size was 120 Sarracenia plants total. The plants were given feed one a week for a total duration of seven weeks. Above ground size and Amass were measured prior to commencing treatments.
-
-##  
+Each Sarracenia species had two plants that were assigned one of six feeding levels in a regression design ranging from 0 to 0.25g of finely ground wasps per feeding for small sized species, 0 to 0.5g for intermediate sized species, and 0 - 1.0g for large sized species. The population size was 120 Sarracenia plants total. The plants were given feed one a week for a total duration of seven weeks. Above ground size and Amass were measured prior to commencing treatments (Ellison).
 
 ```{r libraries}
 library(tidyverse)
@@ -37,6 +35,10 @@ library(GGally)
 library(MuMIn)
 ```
 
+## Description of Data Organization and Processing
+
+The data for this analysis was filtered to only look at the totmass (total above and below ground plant biomass), the Sarracenia species, feed level, sla (specific leaf area of youngest fully-expanded leaf), chlorophyll, Amass (mass-based light-saturated photosynthetic rate of youngest leaf), num_lvs (total number of pitcher and phyllodes produced by each plant), and num_phylls (number of phyllodes produced by each plant).
+
 ```{r reading-data}
 plant <- read_csv(here("data", "hf109-01-sarracenia.csv")) %>% 
   # make the column names cleaner
@@ -46,6 +48,10 @@ plant <- read_csv(here("data", "hf109-01-sarracenia.csv")) %>%
 ```
 
 ## Visualization of Missing Observations and Processing
+
+Caption: As seen in the visualization plot, chlorophyll, amass, and sla have comparatively more missing data than the other variables.
+
+Discussion: It seems that num_phylls and num_lvs also have two missing data points whereas totmass, species, and feedlevel is missing no data. This is probably because species and feed level were determined before the experiment and did not need to be measured, whereas chlorophyll, amass, and sla are variables that are harder to measure because they are dependent on the growth of the Sarracenia plants.
 
 ```{r missing-data-visualization}
 gg_miss_var(plant)
@@ -60,9 +66,9 @@ plant_subset <- plant %>%
 
 ## Visualization of Pearson's Correlation Between Variables
 
-Create a correlation plot:
+Caption: The visualization displays Pearson's correlation between the variables.
 
-(example writing) To determine the realtionships between numerical variables in our dataset, we calculated Pearson's r and visually represented correlation using a correlation plot.
+Discussion: To determine the realtionships between numerical variables in our dataset, we calculated Pearson's r and visually represented correlation using a correlation plot. The correlation coefficients range from -1 to 1, with positive values indicating a positive correlation and negative values indicating a negative correlation. The variables with the least correlation are num_phylls and chlorophyll and the variables with the most correlation are amass and sla.
 
 ```{r correlation-plot}
 # calculate pearson's r for numerical values only
@@ -80,7 +86,9 @@ corrplot(plant_cor,
 
 ## Visualization of Relationships Between Variables
 
-Create a plot of each variable compared against the others
+Caption: This pairs plot visualizes the relationships between variables in the plant data set.
+
+Discussion: To determine how species and physiological characteristics predict biomass, this pairs plot provded a matrix of scatter plots, with each variable plotted against every other variable. Analyzing the scatter plots can identify the correlations between the variables and outliers that may require further investigation.
 
 ```{r pairs-plot}
 plant_subset %>% 
@@ -88,11 +96,9 @@ plant_subset %>%
   ggpairs()
 ```
 
-Starting regression here:
-
-(example) To determine how species and physiological characteristics predict biomass, we fit multiple linear models.
-
 ## Null and Full Models
+
+Discussion: The null model that was created demonstrates the null hypothesis that the variables, or Sarracenia characteristics, do not predict biomass and only takes the total mass into account. The full model demonstrates the alternative hypothesis that the variables do predict biomass and takes all of the variables into account. The logs of the variables are taken to linearize the data.
 
 ```{r null-and-full-models}
 # making a null model, which is represented by a one and we only want it from the plant_subset dataset
@@ -101,29 +107,23 @@ null <- lm(totmass ~ 1, data = plant_subset)
 full <- lm(totmass ~ species + feedlevel + sla + chlorophyll + amass + num_lvs + num_phylls, data = plant_subset)
 ```
 
-We visually assess normality and homoscedasticity of residuals using diagnostic plots for the full model:
-
 ## Visual and Statistical Assumption Checks for Null and Full Models
+
+Discussion: We visually assess normality and homoscedasticity of residuals using diagnostic plots for the full model. We also tested for normality using the Shapiro-Wilk test (null hypothesis: variable of interest (i.e. the residuals) are normally distributed). We tested for homoscedasticity using the Breusch-Pagan test (null hypothesis: variable of interest has constant variance); for homoscedasticity, this is easier to see in residuals vs fitted whwre dots are clumped in beginning and then spread out, therefore it is borderline homoscedasticity.
 
 ```{r full-diagnostic}
 par(mfrow = c(2,2))
 plot(full)
 ```
 
-For homoscedasticity, this is easier to see in residuals vs fitted, and shows that the red lines are flat (good sign) and the dots are spread out in comparison. Clumped in beginning and then spread out, so a little cone shaped, therefore it is borderline homoscedasticity.
-
-We also tested for normality using the Shapiro-Wilk test (null hypothesis: variable of interest (i.e. the residuals) are normally distributed)
-
-We tested for homoscedasticity using the Breusch-Pagan test (null hypothesis: variable of interest has constant variance).
-
 ```{r check-normality}
 check_normality(full)
 check_heteroscedasticity(full)
 ```
 
-Transform the response variable (take the log 10 or whatever mathematical transformation) to transform your residuals to be normal because most data from the field, is not normal (as we have seen).
-
 ## Explanation of Transformation
+
+Discussion: Transform the response variable by taking log 10 to mathematically transform the residuals to be normal because most data from the field, is not normal. After transforming the data, the residuals appeared as normally distributed and the variance appeared to be homoscedastic, whereas before the mathematical transformation they were not.
 
 ```{r null-and-full-logs}
 full_log <- lm(log(totmass) ~ species + feedlevel + sla + chlorophyll + amass + num_lvs + num_phylls, data = plant_subset)
@@ -146,8 +146,6 @@ car::vif(full_log)
 We evaluated multicollinearity by calculating generalized variance inflation factor and determined that....
 
 ## Model 2
-
-Addressing the question: what set of predictor variables best explores the response?
 
 ```{r model2_log}
 model2_log <- lm(log(totmass) ~ species, data = plant_subset)
