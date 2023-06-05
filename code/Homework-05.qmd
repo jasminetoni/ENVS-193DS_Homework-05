@@ -4,13 +4,17 @@ format: html
 editor: visual
 ---
 
-# ENVS 193 Homework 5
-
-## Introduction
+# Introduction
 
 Sarracenia are pitcher plants that are carnivorous and bright in appearance. Pitchers are specialized leaves that sarracenia have, which have been evolved to capture and digest prey (Fish). Specially, they have been found to obtain, use, store, and re-use nitrogen as a major component of their plant fitness (Butler). People care about sarracenia because they help to control insect populations and cycle nutrients in their ecosystems (Newell). It is important to understand how the characteristics of sarracenia predict their biomass because it provide helpful insight to their ecological role and how they affect the environment. In this study, predicting biomass based off of sarracenia characteristics will be addressed. Specifically, sarracenia will be given differing amounts of prey, and the effects on photosynthetic rate, chlorophyll fluorescence, growth, architecture, foliar nutrient, and chlorophyll content will be measured. The hypothesis that was tested was that increased prey availability to sarracenia would increase overall plant biomass.
 
-## Methods
+# Methods
+
+## Sampling Methods
+
+Each Sarracenia species had two plants that were assigned one of six feeding levels in a regression design ranging from 0 to 0.25g of finely ground wasps per feeding for small sized species, 0 to 0.5g for intermediate sized species, and 0 - 1.0g for large sized species. The population size was 120 Sarracenia plants total. The plants were given feed one a week for a total duration of seven weeks. Above ground size and Amass were measured prior to commencing treatments.
+
+##  
 
 ```{r libraries}
 library(tidyverse)
@@ -41,6 +45,8 @@ plant <- read_csv(here("data", "hf109-01-sarracenia.csv")) %>%
   select(totmass, species, feedlevel, sla, chlorophyll, amass, num_lvs, num_phylls)
 ```
 
+## Visualization of Missing Observations and Processing
+
 ```{r missing-data-visualization}
 gg_miss_var(plant)
 ```
@@ -51,6 +57,8 @@ Subsetting the data by dropping NAs:
 plant_subset <- plant %>% 
   drop_na(sla, chlorophyll, amass, num_lvs, num_phylls)
 ```
+
+## Visualization of Pearson's Correlation Between Variables
 
 Create a correlation plot:
 
@@ -70,6 +78,8 @@ corrplot(plant_cor,
          )
 ```
 
+## Visualization of Relationships Between Variables
+
 Create a plot of each variable compared against the others
 
 ```{r pairs-plot}
@@ -82,6 +92,8 @@ Starting regression here:
 
 (example) To determine how species and physiological characteristics predict biomass, we fit multiple linear models.
 
+## Null and Full Models
+
 ```{r null-and-full-models}
 # making a null model, which is represented by a one and we only want it from the plant_subset dataset
 null <- lm(totmass ~ 1, data = plant_subset)
@@ -90,6 +102,8 @@ full <- lm(totmass ~ species + feedlevel + sla + chlorophyll + amass + num_lvs +
 ```
 
 We visually assess normality and homoscedasticity of residuals using diagnostic plots for the full model:
+
+## Visual and Statistical Assumption Checks for Null and Full Models
 
 ```{r full-diagnostic}
 par(mfrow = c(2,2))
@@ -109,6 +123,8 @@ check_heteroscedasticity(full)
 
 Transform the response variable (take the log 10 or whatever mathematical transformation) to transform your residuals to be normal because most data from the field, is not normal (as we have seen).
 
+## Explanation of Transformation
+
 ```{r null-and-full-logs}
 full_log <- lm(log(totmass) ~ species + feedlevel + sla + chlorophyll + amass + num_lvs + num_phylls, data = plant_subset)
 
@@ -119,6 +135,8 @@ check_normality(full_log)
 check_heteroscedasticity(full_log)
 ```
 
+## Variance Inflation Factor Check for Full Model
+
 Evaluate multicollinearity:
 
 ```{r calculate-vif}
@@ -126,6 +144,8 @@ car::vif(full_log)
 ```
 
 We evaluated multicollinearity by calculating generalized variance inflation factor and determined that....
+
+## Model 2
 
 Addressing the question: what set of predictor variables best explores the response?
 
@@ -159,6 +179,8 @@ MuMIn::model.sel(full_log, model2_log, null_log)
 
 The model that seems to be the best is full_log (it is looking for what explains the most variance) because it's value is the lowest. The AIC value for the full_log was 133.9 and for model2_log is was 157.6 and 133.9 \< 157.6 so full_log best explains the variance.
 
+## Model 3
+
 ```{r model3_log}
 model3_log <- lm(log(totmass) ~ sla, data = plant_subset)
 ```
@@ -188,6 +210,8 @@ MuMIn::model.sel(full_log, model3_log, null_log)
 ```
 
 We compared models using AIC and chose the model with the lowest value, which was full_log because it has a AIC value of 133.9 and sla's AIC value is 274.7. Because 133.9 is less than 274.7, it full_log is the model that explains the variance the most.
+
+## Model 4
 
 ```{r model4_log}
 model4_log <- lm(log(totmass) ~ feedlevel, data = plant_subset)
@@ -219,10 +243,14 @@ MuMIn::model.sel(full_log, model4_log, null_log)
 
 The model that seems to be the best is full_log because it's value is the lowest. The AIC value for the full_log was 133.9 and for model4_log is was 295.0 and 133.9 \< 295.0. We are looking for the simplest explanation, so full_log best explains the variance.
 
-## Bibliography
+# Results
 
-BUTLER, J.L. and ELLISON, A.M. (2007), Nitrogen cycling dynamics in the carnivorous northern pitcher plant, *Sarracenia purpurea*. Functional Ecology, 21: 835-843. https://doi.org/10.1111/j.1365-2435.2007.01307.x
+# Bibliography
 
-Fish, Durland, and Donald W. Hall. \"Succession and Stratification of Aquatic Insects Inhabiting the Leaves of the Insectivorous Pitcher Plant, Sarracenia Purpurea.\" *The American Midland Naturalist* 99, no. 1 (1978): 172--83. https://doi.org/10.2307/2424941
+BUTLER, J.L. and ELLISON, A.M. (2007), Nitrogen cycling dynamics in the carnivorous northern pitcher plant, *Sarracenia purpurea*. Functional Ecology, 21: 835-843. https://doi.org/10.1111/j.1365-2435.2007.01307.x (Accessed 2023-06-04).
 
-Newell, S.J. and Nastase, A.J. (1998), Efficiency of insect capture by *Sarracenia purpurea*(Sarraceniaceae), the northern pitcher plant. Am. J. Bot., 85: 88-91. https://doi.org/10.2307/2446558
+Ellison, A. and E. Farnsworth. 2021. Effects of Prey Availability on Sarracenia Physiology at Harvard Forest 2005 ver 18. Environmental Data Initiative. https://doi.org/10.6073/pasta/26b22d09279e62fd729ffc35f9ef0174 (Accessed 2023-06-05).
+
+Fish, Durland, and Donald W. Hall. \"Succession and Stratification of Aquatic Insects Inhabiting the Leaves of the Insectivorous Pitcher Plant, Sarracenia Purpurea.\" *The American Midland Naturalist* 99, no. 1 (1978): 172--83. https://doi.org/10.2307/2424941 (Accessed 2023-06-04).
+
+Newell, S.J. and Nastase, A.J. (1998), Efficiency of insect capture by *Sarracenia purpurea*(Sarraceniaceae), the northern pitcher plant. Am. J. Bot., 85: 88-91. https://doi.org/10.2307/2446558 (Accessed 2023-06-04).

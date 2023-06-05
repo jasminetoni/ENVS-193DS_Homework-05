@@ -193,7 +193,15 @@ plot(ggpredict(full_log, terms = "feedlevel", back.transform = TRUE), add.data =
 
 plot(ggpredict(full_log, terms = "sla", back.transform = TRUE), add.data = TRUE)
 
+plot(ggpredict(full_log, terms = "amass", back.transform = TRUE), add.data = TRUE)
+
+plot(ggpredict(full_log, terms = "num_lvs", back.transform = TRUE), add.data = TRUE)
+
+plot(ggpredict(full_log, terms = "num_phylls", back.transform = TRUE), add.data = TRUE)
+
 model_pred
 ```
+
+(totmass \~ species + feedlevel + sla + chlorophyll + amass + num_lvs + num_phylls, data = plant_subset)
 
 ## different types of anovas
