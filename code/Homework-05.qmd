@@ -1,15 +1,14 @@
 ---
-title: "ENVS 193DS Homework 05"
-format: 
-  html:
-    toc: true
-    toc-location: left
-    code-fold: true
-    theme: yeti
-execute: 
-  message: false
-  warning: false
+title: "Homework-05"
+format: html
+editor: visual
 ---
+
+# ENVS 193 Homework 5
+
+## Introduction
+
+## Methods
 
 ```{r libraries}
 library(tidyverse)
@@ -101,14 +100,14 @@ We also tested for normality using the Shapiro-Wilk test (null hypothesis: varia
 
 We tested for homoscedasticity using the Breusch-Pagan test (null hypothesis: variable of interest has constant variance).
 
-```{r}
+```{r check-normality}
 check_normality(full)
 check_heteroscedasticity(full)
 ```
 
 Transform the response variable (take the log 10 or whatever mathematical transformation) to transform your residuals to be normal because most data from the field, is not normal (as we have seen).
 
-```{r}
+```{r null-and-full-logs}
 full_log <- lm(log(totmass) ~ species + feedlevel + sla + chlorophyll + amass + num_lvs + num_phylls, data = plant_subset)
 
 null_log <- lm(log(totmass) ~ 1, data = plant_subset)
@@ -130,22 +129,22 @@ try some models
 
 addressing the question: what set of predictor variables best explores the response?
 
-```{r}
+```{r model2_log}
 model2_log <- lm(log(totmass) ~ species, data = plant_subset)
 ```
 
-check assumptions for model 2:
+Check assumptions for model 2:
 
-```{r}
+```{r check-assumptions-model-2}
 plot(model2_log)
 
 check_normality(model2_log)
 check_heteroscedasticity(model2_log)
 ```
 
-compare models using Akaike's Information criterion (AIC) values
+Compare models using Akaike's Information criterion (AIC) values
 
-```{r}
+```{r compare-mdoels-with-AIC}
 #AICc is for smaller smaple sizes
 #MUMIn  and AIC also work
 AICc(full_log)
@@ -160,40 +159,54 @@ The model that seems to be the best is full_log (it is looking for what explains
 
 We compared models using AIC and chose the model with the lowest value, which was... (An's words)
 
-## Results
-
-We found that the \_\_\_\_\_\_ model including \_\_\_\_ \_\_\_\_\_ \_\_\_\_\_ predictors, \_\_\_\_\_\_\_\_ (model summary).
-
-```{r}
-summary(full_log)
-
-table <- tidy(full_log, conf.int = TRUE) %>% 
-  # change the p-value numbers if they're really small
-  # change the estimates, standard errors, and t-statistics
-  # using mutate
-  # make it into a flextable
-  flextable() %>% 
-  # fit it to the viewer
-  autofit()
-
-table
+```{r model3_log}
+model3_log <- lm(log(totmass) ~ sla, data = plant_subset)
 ```
 
-use 'ggpredict()' to backtransform estimates
+Check assumptions for model 3
 
-```{r}
-model_pred <- ggpredict(full_log, terms = "species", back.transform = TRUE)
+```{r check-assumptions-model-3}
+plot(model3_log)
 
-# the same as plot(ggpredict(full_log, terms = "species", back.transform = TRUE), add.data = TRUE)
-plot(model_pred, add.data = TRUE)
-
-plot(ggpredict(full_log, terms = "chlorophyll", back.transform = TRUE), add.data = TRUE)
-
-plot(ggpredict(full_log, terms = "feedlevel", back.transform = TRUE), add.data = TRUE)
-
-plot(ggpredict(full_log, terms = "sla", back.transform = TRUE), add.data = TRUE)
-
-model_pred
+check_normality(model3_log)
+check_heteroscedasticity(model3_log)
 ```
 
-## different types of anovas
+Compare models using Akaike's Information criterion (AIC) values
+
+```{r compare-mdoels-with-AIC}
+#AICc is for smaller smaple sizes
+#MUMIn  and AIC also work
+AICc(full_log)
+AICc(model3_log)
+AICc(null_log)
+
+MuMIn::AICc(full_log, model3_log, null_log)
+MuMIn::model.sel(full_log, model3_log, null_log)
+```
+
+The model that seems to be the best is full_log (it is looking for what explains the most variance) because it's value is the lowest. We are looking for the simplest explanation, so what in the full_log explains the variance.
+
+We compared models using AIC and chose the model with the lowest value, which was... (An's words)
+
+```{r model4_log}
+model4_log <- lm(log(totmass) ~ feedlevel, data = plant_subset)
+```
+
+```{r check-assumptions-model-4}
+plot(model4_log)
+
+check_normality(model4_log)
+check_heteroscedasticity(model4_log)
+```
+
+```{r compare-mdoels-with-AIC}
+#AICc is for smaller smaple sizes
+#MUMIn  and AIC also work
+AICc(full_log)
+AICc(model4_log)
+AICc(null_log)
+
+MuMIn::AICc(full_log, model4_log, null_log)
+MuMIn::model.sel(full_log, model4_log, null_log)
+```
