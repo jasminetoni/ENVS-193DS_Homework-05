@@ -13,6 +13,8 @@ execute:
 
 # Introduction
 
+Link to Github Repository: https://github.com/jasminetoni/ENVS-193DS_Homework-05.git
+
 Sarracenia are pitcher plants that are carnivorous and bright in appearance. Pitchers are specialized leaves that Sarracenia have, which have been evolved to capture and digest prey (Fish). Specially, they have been found to obtain, use, store, and re-use nitrogen as a major component of their plant fitness (Butler). People care about Sarracenia because they help to control insect populations and cycle nutrients in their ecosystems (Newell). It is important to understand how the characteristics of Sarracenia predict their biomass because it provide helpful insight to their ecological role and how they affect the environment. In this study, predicting biomass based off of Sarracenia characteristics will be addressed. Specifically, Sarracenia will be given differing amounts of prey, and the effects on photosynthetic rate, chlorophyll fluorescence, growth, architecture, foliar nutrient, and chlorophyll content will be measured. The hypothesis that was tested was that increased prey availability to Sarracenia would increase overall plant biomass.
 
 # Methods
@@ -166,7 +168,7 @@ check_heteroscedasticity(model2_log)
 
 Compare models using Akaike's Information criterion (AIC) values
 
-```{r compare-mdoels-with-AIC}
+```{r model-2-AIC}
 #AICc is for smaller smaple sizes
 #MUMIn  and AIC also work
 AICc(full_log)
@@ -197,7 +199,7 @@ check_heteroscedasticity(model3_log)
 
 Compare models using Akaike's Information criterion (AIC) values
 
-```{r compare-mdoels-with-AIC}
+```{r model-3-AIC}
 #AICc is for smaller smaple sizes
 #MUMIn  and AIC also work
 AICc(full_log)
@@ -230,7 +232,7 @@ check_heteroscedasticity(model4_log)
 
 Compare models using Akaike's Information criterion (AIC) values
 
-```{r compare-mdoels-with-AIC}
+```{r  model-4-AIC}
 #AICc is for smaller smaple sizes
 #MUMIn  and AIC also work
 AICc(full_log)
