@@ -280,7 +280,7 @@ The best model that used Sarracenia characteristics to predict biomass was the f
 
 We used model 2 to visualize species as a predictor variable of biomass; it is important to note that after the full model, model 2 had the lowest AIC value of 156.7. The predicted biomass (g) of Sarracenia is plotted against the different species within the data set. Furthermore, the different Sarracenia species largely differ in biomass. The species leucophylla has the greatest predicted biomass and the species psittacina is predicted to have the smallest biomass. The data is displayed as a scatter plot illustrating the mean and standard error bars and the data points behind.
 
-The full model is full because it creates a full picture. It takes all of the predictor variables into account: chlorophyll amount, feed level, species, and pitcher amount. Because the full model does not exclude factors, it represents the data pretty holistically and successfully represents the relationships between predictor variables and biomass of Sarracenia. Furthermore, the full model represents the relationship between Sarracenia plants physiological, morphological, and taxonomic characterstics.
+The full model is full because it creates a full picture. It takes all of the predictor variables into account: chlorophyll amount, feed level, species, and pitcher amount. Because the full model does not exclude factors, it represents the data pretty holistically and successfully represents the relationships between predictor variables and biomass of Sarracenia. Furthermore, the full model represents the relationship between Sarracenia plants physiological, morphological, and taxonomic characteristics.
 
 # Bibliography
 
