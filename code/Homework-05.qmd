@@ -1,7 +1,14 @@
 ---
-title: "Homework-05"
-format: html
-editor: visual
+title: "ENVS 193DS Homework 05"
+format: 
+  html:
+    toc: true
+    toc-location: left
+    code-fold: true
+    theme: yeti
+execute: 
+  message: false
+  warning: false
 ---
 
 # Introduction
@@ -9,10 +16,6 @@ editor: visual
 Sarracenia are pitcher plants that are carnivorous and bright in appearance. Pitchers are specialized leaves that Sarracenia have, which have been evolved to capture and digest prey (Fish). Specially, they have been found to obtain, use, store, and re-use nitrogen as a major component of their plant fitness (Butler). People care about Sarracenia because they help to control insect populations and cycle nutrients in their ecosystems (Newell). It is important to understand how the characteristics of Sarracenia predict their biomass because it provide helpful insight to their ecological role and how they affect the environment. In this study, predicting biomass based off of Sarracenia characteristics will be addressed. Specifically, Sarracenia will be given differing amounts of prey, and the effects on photosynthetic rate, chlorophyll fluorescence, growth, architecture, foliar nutrient, and chlorophyll content will be measured. The hypothesis that was tested was that increased prey availability to Sarracenia would increase overall plant biomass.
 
 # Methods
-
-## Sampling Methods
-
-Each Sarracenia species had two plants that were assigned one of six feeding levels in a regression design ranging from 0 to 0.25g of finely ground wasps per feeding for small sized species, 0 to 0.5g for intermediate sized species, and 0 - 1.0g for large sized species. The population size was 120 Sarracenia plants total. The plants were given feed one a week for a total duration of seven weeks. Above ground size and Amass were measured prior to commencing treatments (Ellison).
 
 ```{r libraries}
 library(tidyverse)
@@ -37,7 +40,7 @@ library(MuMIn)
 
 ## Description of Data Organization and Processing
 
-The data for this analysis was filtered to only look at the totmass (total above and below ground plant biomass), the Sarracenia species, feed level, sla (specific leaf area of youngest fully-expanded leaf), chlorophyll, Amass (mass-based light-saturated photosynthetic rate of youngest leaf), num_lvs (total number of pitcher and phyllodes produced by each plant), and num_phylls (number of phyllodes produced by each plant).
+Reading in the data using the \[here\] package and organizing the data to have to columns we want.
 
 ```{r reading-data}
 plant <- read_csv(here("data", "hf109-01-sarracenia.csv")) %>% 
@@ -49,26 +52,24 @@ plant <- read_csv(here("data", "hf109-01-sarracenia.csv")) %>%
 
 ## Visualization of Missing Observations and Processing
 
-Caption: As seen in the visualization plot, chlorophyll, amass, and sla have comparatively more missing data than the other variables.
-
-Discussion: It seems that num_phylls and num_lvs also have two missing data points whereas totmass, species, and feedlevel is missing no data. This is probably because species and feed level were determined before the experiment and did not need to be measured, whereas chlorophyll, amass, and sla are variables that are harder to measure because they are dependent on the growth of the Sarracenia plants.
+Visualizing the missing observations from "plants" data with the "gg_miss_var" function. As seen in the visualization plot, chlorophyll, amass, and sla have comparatively more missing data than the other variables. Variables on the y-axis and the number of missing data on the x-axis.
 
 ```{r missing-data-visualization}
+# creating data visualization of missing data in plants data
 gg_miss_var(plant)
 ```
 
-Subsetting the data by dropping NAs:
+Subsetting the data by dropping NAs using the drop_na function:
 
 ```{r subset-drop-NA}
+# create subset of data drapping Nas
 plant_subset <- plant %>% 
   drop_na(sla, chlorophyll, amass, num_lvs, num_phylls)
 ```
 
 ## Visualization of Pearson's Correlation Between Variables
 
-Caption: The visualization displays Pearson's correlation between the variables.
-
-Discussion: To determine the realtionships between numerical variables in our dataset, we calculated Pearson's r and visually represented correlation using a correlation plot. The correlation coefficients range from -1 to 1, with positive values indicating a positive correlation and negative values indicating a negative correlation. The variables with the least correlation are num_phylls and chlorophyll and the variables with the most correlation are amass and sla.
+Creating a correlation plot using "corrplot" and using Pearson's r. The variables on the x-axis and the y-axis and Pearson's r value is shown by color-coded numbers between variables. Additionally, Pearson's r displays if the variables are positively or negatively correlated.
 
 ```{r correlation-plot}
 # calculate pearson's r for numerical values only
@@ -86,11 +87,10 @@ corrplot(plant_cor,
 
 ## Visualization of Relationships Between Variables
 
-Caption: This pairs plot visualizes the relationships between variables in the plant data set.
-
-Discussion: To determine how species and physiological characteristics predict biomass, this pairs plot provded a matrix of scatter plots, with each variable plotted against every other variable. Analyzing the scatter plots can identify the correlations between the variables and outliers that may require further investigation.
+Visualize the relationships between variables in the plant data set by plotting each variable against one another in a pairs plot with "ggpairs". The variables are on the x-axis and y-axis; when they intersect, the pairs plot shows their correlation with dot plots and the species row displays a box plot with error bars. Additionally, there are correlation values between the variables.
 
 ```{r pairs-plot}
+# create a pairs plot vaisualization, not related to correlation for all of the selected variables
 plant_subset %>% 
   select(species:num_phylls) %>% 
   ggpairs()
@@ -98,7 +98,7 @@ plant_subset %>%
 
 ## Null and Full Models
 
-Discussion: The null model that was created demonstrates the null hypothesis that the variables, or Sarracenia characteristics, do not predict biomass and only takes the total mass into account. The full model demonstrates the alternative hypothesis that the variables do predict biomass and takes all of the variables into account. The logs of the variables are taken to linearize the data.
+Create null and full models in order to determine the predictability of different variables.
 
 ```{r null-and-full-models}
 # making a null model, which is represented by a one and we only want it from the plant_subset dataset
@@ -109,27 +109,30 @@ full <- lm(totmass ~ species + feedlevel + sla + chlorophyll + amass + num_lvs +
 
 ## Visual and Statistical Assumption Checks for Null and Full Models
 
-Discussion: We visually assess normality and homoscedasticity of residuals using diagnostic plots for the full model. We also tested for normality using the Shapiro-Wilk test (null hypothesis: variable of interest (i.e. the residuals) are normally distributed). We tested for homoscedasticity using the Breusch-Pagan test (null hypothesis: variable of interest has constant variance); for homoscedasticity, this is easier to see in residuals vs fitted whwre dots are clumped in beginning and then spread out, therefore it is borderline homoscedasticity.
+Visually assessing the data using diagnostic plots for the full model. The residuals vs fitted plot displays a fairly straight line with slightly cone shaped data plot. The normal q-q plot shows fairly uniform data and the scale-location shows a slightly positive linear relationship. The residuals vs leverage plot is relatively clumped, although there are no data points past Cook's Distance.
 
 ```{r full-diagnostic}
+# make diagnostic plot for full model
 par(mfrow = c(2,2))
 plot(full)
 ```
 
 ```{r check-normality}
+# check normality and heteroscedasticity for full model
 check_normality(full)
 check_heteroscedasticity(full)
 ```
 
 ## Explanation of Transformation
 
-Discussion: Transform the response variable by taking log 10 to mathematically transform the residuals to be normal because most data from the field, is not normal. After transforming the data, the residuals appeared as normally distributed and the variance appeared to be homoscedastic, whereas before the mathematical transformation they were not.
+Transform the response variable by taking the log 10; this is because the residuals are not normal because data from the field is typically non-normal.
 
 ```{r null-and-full-logs}
+# take log 10 of data to transform
 full_log <- lm(log(totmass) ~ species + feedlevel + sla + chlorophyll + amass + num_lvs + num_phylls, data = plant_subset)
 
 null_log <- lm(log(totmass) ~ 1, data = plant_subset)
-
+# check normality and variance of data after transformation
 plot(full_log)
 check_normality(full_log)
 check_heteroscedasticity(full_log)
@@ -137,30 +140,29 @@ check_heteroscedasticity(full_log)
 
 ## Variance Inflation Factor Check for Full Model
 
-Evaluate multicollinearity:
+Evaluate multicollinearity using vif
 
 ```{r calculate-vif}
 car::vif(full_log)
 ```
 
-We evaluated multicollinearity by calculating generalized variance inflation factor and determined that....
-
 ## Model 2
 
 ```{r model2_log}
+# model with species predicting totmass
 model2_log <- lm(log(totmass) ~ species, data = plant_subset)
 ```
 
-Check assumptions for model 2:
+Check assumptions for model 2: using diagnostic plots and checking for normality and variance. The data looks relatively normal because the line of best fit is relatively straight and there are no points past Cook's distance.
 
 ```{r check-assumptions-model-2}
+# plot the diagnostics for model 2
 plot(model2_log)
 
+# check normality and variance
 check_normality(model2_log)
 check_heteroscedasticity(model2_log)
 ```
-
-The species model2_log passes the check for normality and also passes the check for heteroscedasticity.
 
 Compare models using Akaike's Information criterion (AIC) values
 
@@ -171,28 +173,27 @@ AICc(full_log)
 AICc(model2_log)
 AICc(null_log)
 
+# compare AIC values to null and full models
 MuMIn::AICc(full_log, model2_log, null_log)
 MuMIn::model.sel(full_log, model2_log, null_log)
 ```
 
-The model that seems to be the best is full_log (it is looking for what explains the most variance) because it's value is the lowest. The AIC value for the full_log was 133.9 and for model2_log is was 157.6 and 133.9 \< 157.6 so full_log best explains the variance.
-
 ## Model 3
 
 ```{r model3_log}
+# model comparing sla and totmass
 model3_log <- lm(log(totmass) ~ sla, data = plant_subset)
 ```
 
-Check assumptions for model 3:
+Check assumptions for model 3: using diagnostic plots and checking normality and variance. The data varied from the normal line, but there are no data points past Cook's distance.
 
 ```{r check-assumptions-model-3}
 plot(model3_log)
 
+# check normality and variance
 check_normality(model3_log)
 check_heteroscedasticity(model3_log)
 ```
-
-The sla model3_log does not pass the check for normality and also does not pass the check for heteroscedasticity.
 
 Compare models using Akaike's Information criterion (AIC) values
 
@@ -203,6 +204,7 @@ AICc(full_log)
 AICc(model3_log)
 AICc(null_log)
 
+# compare this model against null and full AIC values
 MuMIn::AICc(full_log, model3_log, null_log)
 MuMIn::model.sel(full_log, model3_log, null_log)
 ```
@@ -212,19 +214,19 @@ We compared models using AIC and chose the model with the lowest value, which wa
 ## Model 4
 
 ```{r model4_log}
+# model with feedlevel predicting totmass
 model4_log <- lm(log(totmass) ~ feedlevel, data = plant_subset)
 ```
 
-Check assumptions for model 4:
+Check assumptions for model 4: using diagnostic plots and checking normality and variance. The data is shown to deviate slightly from the normal line, especially in the normal q-q plot, although no points go past Cook's distance.
 
 ```{r check-assumptions-model-4}
 plot(model4_log)
 
+# check normality and variance
 check_normality(model4_log)
 check_heteroscedasticity(model4_log)
 ```
-
-The feedlevel model4_log does not pass the check for normality, although it passes the check for heteroscedasticity.
 
 Compare models using Akaike's Information criterion (AIC) values
 
@@ -235,13 +237,50 @@ AICc(full_log)
 AICc(model4_log)
 AICc(null_log)
 
+# compare this model against null and full models
 MuMIn::AICc(full_log, model4_log, null_log)
 MuMIn::model.sel(full_log, model4_log, null_log)
 ```
 
-The model that seems to be the best is full_log because it's value is the lowest. The AIC value for the full_log was 133.9 and for model4_log is was 295.0 and 133.9 \< 295.0. We are looking for the simplest explanation, so full_log best explains the variance.
+The sampling methods involved Sarracenia species each with two plants assigned one of six feeding levels; the regression design ranged from 0 to 0.25g of finely ground wasps per feeding for small sized species, 0 to 0.5g for intermediate sized species, and 0 - 1.0g for large sized species. The population size was 120 Sarracenia plants total. The plants were given feed one a week for a total duration of seven weeks. Above ground size and Amass were measured prior to commencing treatments (Ellison). The data for this analysis was organized by filtering to only look at the totmass (total above and below ground plant biomass), the Sarracenia species, feed level, sla (specific leaf area of youngest fully-expanded leaf), chlorophyll, Amass (mass-based light-saturated photosynthetic rate of youngest leaf), num_lvs (total number of pitcher and phyllodes produced by each plant), and num_phylls (number of phyllodes produced by each plant). As for missing data, it seems that num_phylls and num_lvs also have two missing data points whereas totmass, species, and feedlevel is missing no data. This is probably because species and feed level were determined before the experiment and did not need to be measured, whereas chlorophyll, amass, and sla are variables that are harder to measure because they are dependent on the growth of the Sarracenia plants. The "plant" data set was then made into a subset to get rid of the "Nas" missing data. Using a correlation plot, we visually represented the relationship between numerical variables in our data set. To determine the relationships between numerical variables in our data set, we calculated Pearson's r and visually represented correlation using a correlation plot. The correlation coefficients range from -1 to 1, with positive values indicating a positive correlation and negative values indicating a negative correlation. The variables with the least correlation are num_phylls and chlorophyll and the variables with the most correlation are amass and sla, which had a Pearson's value of more than 0.3. To determine how species and physiological characteristics predict biomass, this pairs plot provided a matrix of scatter plots, with each variable plotted against every other variable. Analyzing the scatter plots can identify the correlations between the variables and outliers that may require further investigation. The null model that was created demonstrates the null hypothesis that the variables, or Sarracenia characteristics, do not predict biomass and only takes the total mass into account. The full model demonstrates the alternative hypothesis that the variables do predict biomass and takes all of the variables into account. The logs of the variables are taken to make the data linear. We visually assess normality and homoscedasticity of residuals using diagnostic plots for the full model. We also tested for normality using the Shapiro-Wilk test (null hypothesis: variable of interest (i.e. the residuals) are normally distributed). We tested for homoscedasticity using the Breusch-Pagan test (null hypothesis: variable of interest has constant variance); for homoscedasticity, this is easier to see in residuals vs fitted where dots are clumped in beginning and then spread out, therefore it is borderline homoscedasticity. Transform the response variable by taking log 10 to mathematically transform the residuals to be normal because most data from the field, is not normal. After transforming the data, the residuals appeared as normally distributed and the variance appeared to be homoscedastic, whereas before the mathematical transformation they were not. We evaluated multicollinearity by calculating generalized variance inflation factor and determined that species is the variable with the greatest vif value. All of the other variables have very similar vif values, all being around 2 and 3, whereas species gvif value is 42. For model 2, we tested the relationship between species and totmass. The species model2_log passes the check for normality and also passes the check for heteroscedasticity. Between full_log and model 2, the model that seems to be the best is full_log (explains the most variance) because it's value is the lowest. The AIC value for the full_log was 133.9 and for model 2 is was 157.6 and 133.9 \< 157.6 so full_log best explains the variance. For model 3, we tested how the variable sla predicts totmass; the sla model3_log does not pass the check for normality and also does not pass the check for heteroscedasticity. We compared full_log and model 3 using AIC and chose the model with the lowest value, which was full_log because it has a AIC value of 133.9 and sla's AIC value is 274.7. Because 133.9 is less than 274.7, it full_log is the model that explains the variance the most. For model 4 we tested the predictability of feed level on totmass. Model 4 did not pass the check for normality, although it passed the check for heteroscedasticity. The model that seems to be the best is full_log because it's value is the lowest. The AIC value for the full_log was 133.9 and for model 4 is was 295.0 and 133.9 \< 295.0. We are looking for the simplest explanation, so once again full_log best explains the variance.
 
 # Results
+
+```{r}
+summary(full_log)
+
+table <- tidy(full_log, conf.int = TRUE) %>% 
+  # change p-value numbers if they're small with mutate
+  # change estimates, standard error, and t-stats to round 
+  # mutate () %>% 
+  # make into a flextable
+  flextable() %>% 
+  # fit for viewer
+  autofit()
+
+table
+```
+
+This model makes predictions for totmass based on the species variable; the species is on the x-axis and the biomass (grams) is on the y-axis. The species include alabamensis, alata, flava, jonesii, leucophylla, minor, psittacina, purpurea, rosea, and rubra. The data is displayed with a dot plot, which is divided by species and the mean is displayed with the standard error in the form of error bars with the data points displayed behind the bars.
+
+```{r}
+# ggpredict function used to make model predictions with the full log
+model_pred <- ggpredict(full_log, terms = "species", back.transform = TRUE)
+
+# plot predicted data
+model_plot <- plot(model_pred, add.data = TRUE) +
+  # change theme and create a title
+  theme_light() +
+  labs(x = "Species", y = "Biomass (g)", title = "Sarracenia Species Predicted Biomass")
+
+model_plot
+```
+
+The best model that used Sarracenia characteristics to predict biomass was the full model. The full model includes all variables such as species, feedlevel, sla, chlorophyll, amass, num_lvs, and num_phylls. The results from the full model was an AIC value of 133.9, which was the lowest AIC value and therefore the best predictor of biomass, despite testing testing single variables predictability of mass. It was because the full model included all the variables that it was the best predictor; relying on one variable is not as dependable because it is more subject to extraneous factors. With the full model, the physciological, morphological, and taxonomic factors were all taken into consideration. Additionally, the full model was shown to be normally distributed and homeoskedascity (variance).
+
+We used model 2 to visualize species as a predictor variable of biomass; it is important to note that after the full model, model 2 had the lowest AIC value of 156.7. The predicted biomass (g) of Sarracenia is plotted against the different species within the data set. Furthermore, the different Sarracenia species largely differ in biomass. The species leucophylla has the greatest predicted biomass and the species psittacina is predicted to have the smallest biomass. The data is displayed as a scatter plot illustrating the mean and standard error bars and the data points behind.
+
+The full model is full because it creates a full picture. It takes all of the predictor variables into account: chlorophyll amount, feed level, species, and pitcher amount. Because the full model does not exclude factors, it represents the data pretty holistically and successfully represents the relationships between predictor variables and biomass of Sarracenia. Furthermore, the full model represents the relationship between Sarracenia plants physiological, morphological, and taxonomic characterstics.
 
 # Bibliography
 
